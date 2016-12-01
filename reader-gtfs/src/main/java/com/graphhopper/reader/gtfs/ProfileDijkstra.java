@@ -77,19 +77,9 @@ class ProfileDijkstra implements TimeDependentRoutingAlgorithm {
             visitedNodes++;
             if (maxVisitedNodes < getVisitedNodes())
                 break;
-            // all nodes at a station have the same nodeid??
-            if (to.contains(label.adjNode)) {
-                addToFoundSolutions(label, foundSolutions);
-                // the number of requested routes is limited to 1 as given the
-                // current setting (no departure time info and "seems" that all
-                // nodes at one station have the same id (id of station)??).
-                // Later, this limit can be simply increased to get the next x
-                // trips
-                if (foundSolutions.size() >= 1)
-                    break;
-                else
-                    continue;
-            }
+
+            if (foundSolutions.size() >= 3)
+                break;
 
             int startNode = label.adjNode;
             EdgeIterator iter = explorer.setBaseNode(startNode);
@@ -137,7 +127,9 @@ class ProfileDijkstra implements TimeDependentRoutingAlgorithm {
                 if (improves(nEdge, sptEntries) && improves(nEdge, targetLabels)) {
                     removeDominated(nEdge, sptEntries);
                     if (to.contains(iter.getAdjNode())) {
-                        removeDominated(nEdge, targetLabels);
+                        addToFoundSolutions(nEdge, foundSolutions);
+                        // no need to relax other edges. node at destination
+                        break;
                     }
                     fromMap.put(iter.getAdjNode(), nEdge);
                     if (to.contains(iter.getAdjNode())) {
@@ -155,7 +147,7 @@ class ProfileDijkstra implements TimeDependentRoutingAlgorithm {
                 throw new AssertionError("Empty edge cannot happen");
         }
         List<Path> result = new ArrayList<>();
-        for (SPTEntry solution : targetLabels) {
+        for (SPTEntry solution : foundSolutions) {
             result.add(new Path(graph, weighting).setWeight(solution.weight).setSPTEntry(solution).extract());
         }
         return result;
@@ -164,7 +156,8 @@ class ProfileDijkstra implements TimeDependentRoutingAlgorithm {
     private void addToFoundSolutions(SPTEntry label, Set<SPTEntry> foundSolutions) {
         // TODO keep only non-dominated routes and use the departure time as
         // criteria. Now the set of found solutions could contain routes that
-        // make no sense.
+        // make no sense. Once the actual departure attribute is available, this
+        // set can be easily filtered
         foundSolutions.add(label);
     }
 
