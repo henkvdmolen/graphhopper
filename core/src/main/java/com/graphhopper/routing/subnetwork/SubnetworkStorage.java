@@ -34,7 +34,8 @@ public class SubnetworkStorage implements Storable<SubnetworkStorage>
 
     public SubnetworkStorage( Directory dir, String postfix )
     {
-        da = dir.find("subnetwork_" + postfix, dir.getDefaultType().isMMap()? DAType.MMAP : DAType.RAM);
+        DAType type = dir.getDefaultType();
+        da = dir.find("subnetwork_" + postfix, type.isMMap()? DAType.MMAP : (type.isStoring() ? DAType.RAM_STORE : DAType.RAM));
     }
 
     /**

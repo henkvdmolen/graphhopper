@@ -95,7 +95,7 @@ public class LMApproximator implements WeightApproximator
                 } else
                 {
                     virtEntry.weight = reverseWeight;
-                    if (weight >= Integer.MAX_VALUE)
+                    if (reverseWeight >= Integer.MAX_VALUE)
                         throw new IllegalStateException("At least one direction of edge ("
                                 + edge + ") should be accessible but wasn't!");
 
